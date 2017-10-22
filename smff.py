@@ -1,4 +1,4 @@
-# SM FFPLAY/FFMPEG Freechat Recorder v.1.0.0 by horacio9a for Python 2.7.13
+# SM FFPLAY/FFMPEG Freechat Recorder v.1.0.1 by horacio9a for Python 2.7.13
 
 import sys, os, urllib, requests, json, ssl, re, time, datetime, command
 from websocket import create_connection
@@ -48,7 +48,13 @@ if modelinfo['stream']['serverId'] != '0':
    'payload') + '=' + requests.utils.quote('{"puserid":"' + str(modelinfo['performer']['id']) + '","roomid":"' + roomInfo[
    'roomid'] + '","showtype":1,"nginx":1}'))
    videoinfo = requests.get(videourl).json()
-   videoinfo = requests.get(videoinfo[0]['url']).json()
+   try:
+     videoinfo = requests.get(videoinfo[0]['url']).json()
+   except:
+     print(colored(" => Model is in PVT or BUSY <=", "yellow",'on_red'))
+     print
+     print(colored(" => END <=", "yellow","on_blue"))
+     sys.exit()
    hlsurl = videoinfo['formats']['mp4-hls']['manifest']
    print (colored(' => hlsurl => {} <=', 'yellow', 'on_blue')).format(hlsurl)
    timestamp = str(time.strftime("%d%m%Y-%H%M%S"))
@@ -62,7 +68,7 @@ if modelinfo['stream']['serverId'] != '0':
    while True:
       try:
          print
-         mode = int(raw_input(colored(" => Select mode (1) REC or (0) PLAY => ", "yellow", "on_blue")))
+         mode = int(raw_input(colored(" => Select mode REC(1) or PLAY(0) => ", "yellow", "on_blue")))
          break
       except ValueError:
          print(colored("\n => Input must be a number <=", "yellow", "on_red"))
@@ -70,26 +76,22 @@ if modelinfo['stream']['serverId'] != '0':
       mod = 'PLAY'
    if mode == 1:
       mod = 'REC'
-   else:
-      mod = 'PLAY'
 
    if mod == 'PLAY':
       print
       print (colored(" => FF PLAY => {} <=", "yellow", "on_magenta")).format(filename)
       print
-      command = ('start ffplay -i {} -infbuf -autoexit -window_title "{} * {} * {}"'.format(hlsurl,model,stime,mn))
+      command = ('{} -hide_banner -loglevel panic -i {} -infbuf -autoexit -window_title "{} * {} * {}"'.format(ffplay,hlsurl,model,stime,mn))
       os.system(command)
-      time.sleep(1)    # pause 1 second
       print(colored(" => END <=", "yellow","on_blue"))
       sys.exit()
 
    if mod == 'REC':
       print
       print (colored(" => FF REC => {} <=", "yellow", "on_red")).format(filename)
-      command = ('start ffmpeg -i {} -c:v copy -c:a aac -b:a 160k {}'.format(hlsurl,pf))
+      command = ('{} -hide_banner -loglevel panic -i {} -c:v copy -c:a aac -b:a 160k {}'.format(ffmpeg,hlsurl,pf))
       os.system(command)
       print
-      time.sleep(1)    # pause 1 second
       print(colored(" => END <=", "yellow","on_blue"))
       sys.exit()
 
