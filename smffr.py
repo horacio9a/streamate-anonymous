@@ -1,4 +1,4 @@
-# SM FFPLAY/FFMPEG Freechat Remote Recorder v.1.0.0 by horacio9a for Python 2.7.13
+# SM FFPLAY/FFMPEG Freechat Remote Recorder v.1.0.1 by horacio9a for Python 2.7.13
 
 import sys, os, urllib, requests, json, ssl, re, time, datetime, command
 from websocket import create_connection
@@ -37,7 +37,13 @@ if modelinfo['stream']['serverId'] != '0':
    'payload') + '=' + requests.utils.quote('{"puserid":"' + str(modelinfo['performer']['id']) + '","roomid":"' + roomInfo[
    'roomid'] + '","showtype":1,"nginx":1}'))
    videoinfo = requests.get(videourl).json()
-   videoinfo = requests.get(videoinfo[0]['url']).json()
+   try:
+     videoinfo = requests.get(videoinfo[0]['url']).json()
+   except:
+     print(colored(" => Model is in PVT or BUSY <=", "yellow",'on_red'))
+     print
+     print(colored(" => END <=", "yellow","on_blue"))
+     sys.exit()
    hlsurl = videoinfo['formats']['mp4-hls']['manifest']
    print (colored(' => hlsurl => {} <=', 'yellow', 'on_blue')).format(hlsurl)
    timestamp = str(time.strftime("%d%m%Y-%H%M%S"))
@@ -45,15 +51,13 @@ if modelinfo['stream']['serverId'] != '0':
    path = config.get('folders', 'output_folder')
    filename = model + '_SM_' + timestamp + '.flv'
    pf = (path + filename)
-   ffplay = config.get('files', 'ffplay')
    ffmpeg = config.get('files', 'ffmpeg')
 
    print
    print (colored(" => FF REC => {} <=", "yellow", "on_red")).format(filename)
-   command = ('ffmpeg -hide_banner -loglevel panic -i {} -c:v copy -c:a aac -b:a 160k {}'.format(hlsurl,pf))
+   command = ('{} -hide_banner -loglevel panic -i {} -c:v copy -c:a aac -b:a 160k {}'.format(ffmpeg,hlsurl,pf))
    os.system(command)
    print
-   time.sleep(1)    # pause 1 second
    print(colored(" => END <=", "yellow","on_blue"))
    sys.exit()
 
