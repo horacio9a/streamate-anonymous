@@ -1,7 +1,8 @@
-# SM Freechat Recorder v.1.0.0 by Horacio for Python 2.7.13
+# SM Freechat Recorder v.1.0.1 by Horacio for Python 2.7.13
 
 import sys, os, urllib, urllib3, ssl, re, time, datetime, requests, random, command
 urllib3.disable_warnings()
+from urllib3 import PoolManager
 reload(sys)
 sys.setdefaultencoding('utf-8')
 from colorama import init, Fore, Back, Style
@@ -32,10 +33,11 @@ print (colored(' => Selected SM Model => {} <=', 'yellow', 'on_blue')).format(mo
 print
 
 url ='https://streamate.com/cam/{}/'.format(model)
-http_pool = urllib3.connection_from_url(url)
-r = http_pool.urlopen('GET',url)
+manager = PoolManager(10)
+r = manager.request('GET', url)
 enc = (r.data)
 dec=urllib.unquote(enc).decode()
+
 sid0 = dec.split("p_sid: '")[1]
 sid = sid0.split("'")[0]
 if len(sid) > 2:
@@ -57,10 +59,10 @@ if len(sid) > 2:
    path = config.get('folders', 'output_folder')
    filename = model + '_SM_' + timestamp + '.flv'
    pf = (path + filename)
-   rtmpdump = config.get('files', 'rtmpdump')
+   rtmp = config.get('files', 'rtmpdump')
 
    print (colored(" => RTMP REC => {} <=", "yellow", "on_red")).format(filename)
-   command = 'start rtmpdump -r"rtmp://fcs{}-1.streamate.com/reflect/{}" -a"reflect/{}" -W"{}" -p"{}" -CS:0 -CS:{} -CS: -CO:1 -CNS:signupargs:smid={} -CNS:srvav:{} -CNS:sessionType:preview -CNS:pid:{} -CNS:sid:{} -CNS:ft:{} -CNS:lang:en -CNS:sk:streamate.com -CNS:hd:1 -CNS:g:{} -CNN:version:8.000000 -CNS:freecnt:3 -CNS:nickname: -CNS:srv:{} -CO:0 -m 900 --live -y"{}" -o"{}"'.format(fcs,sid,sid,swf,url,sid,pid,srv,pid,sid,ft,cnsg,srv,sid,pf)
+   command = 'start {} -r"rtmp://fcs{}-1.streamate.com/reflect/{}" -a"reflect/{}" -W"{}" -p"{}" -CS:0 -CS:{} -CS: -CO:1 -CNS:signupargs:smid={} -CNS:srvav:{} -CNS:sessionType:preview -CNS:pid:{} -CNS:sid:{} -CNS:ft:{} -CNS:lang:en -CNS:sk:streamate.com -CNS:hd:1 -CNS:g:{} -CNN:version:8.000000 -CNS:freecnt:3 -CNS:nickname: -CNS:srv:{} -CO:0 -m 900 --live -y"{}" -o"{}"'.format(rtmp,fcs,sid,sid,swf,url,sid,pid,srv,pid,sid,ft,cnsg,srv,sid,pf)
    os.system(command)
    print
    print(colored(" => END <= ", 'yellow','on_blue'))
