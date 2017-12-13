@@ -1,4 +1,4 @@
-# SM Freechat Recorder v.1.0.1 by Horacio for Python 2.7.13
+# SM Freechat Recorder v.1.0.2 by Horacio for Python 2.7.14
 
 import sys, os, urllib, urllib3, ssl, re, time, datetime, requests, random, command
 urllib3.disable_warnings()
@@ -16,18 +16,18 @@ print(colored(" => START <= ", 'yellow', 'on_blue'))
 print
 
 while True:
-     try:
-         modellist = open(config.get('files', 'model_list'),'r')
-         for (num,value) in enumerate(modellist):
-            print ' =>',(num+1),value[:-1]
-         print
-         mn = int(raw_input(colored(" => Select SM Model => ", 'yellow', 'on_blue')))
-         print
-         break
-     except ValueError:
-         print
-         print(colored(" => Input must be a number <= ", 'yellow', 'on_red'))
-         print
+   try:
+      modellist = open(config.get('files', 'model_list'),'r')
+      for (num,value) in enumerate(modellist):
+         print ' =>',(num+1),value[:-1]
+      print
+      mn = int(raw_input(colored(" => Select SM Model => ", 'yellow', 'on_blue')))
+      print
+      break
+   except ValueError:
+      print
+      print(colored(" => Input must be a number <= ", 'yellow', 'on_red'))
+      print
 model = open(config.get('files', 'model_list'), 'r').readlines()[mn-1][:-1]
 print (colored(' => Selected SM Model => {} <=', 'yellow', 'on_blue')).format(model)
 print
@@ -40,7 +40,14 @@ dec=urllib.unquote(enc).decode()
 
 sid0 = dec.split("p_sid: '")[1]
 sid = sid0.split("'")[0]
-if len(sid) > 2:
+
+if len(sid) > 10:
+   print(colored(" => TRY AGAIN <=", 'yellow','on_blue'))
+   sys.exit()
+else:
+   pass
+
+if len(sid) > 1:
    srv0 = dec.split("p_srv: '")[1]
    srv = srv0.split("'")[0]
    pid0 = dec.split("p_pid: '")[1]
@@ -55,7 +62,7 @@ if len(sid) > 2:
    fcs = fcs0.split('-1')[0]
    print (colored(' => Found: FCS: {} * SRV: {} * SID: {} * PID: {} <=', 'yellow', 'on_blue')).format(fcs,srv,sid,pid)
    print
-   timestamp = str(time.strftime("%d%m%Y_%H%M%S"))
+   timestamp = str(time.strftime("%d%m%Y-%H%M%S"))
    path = config.get('folders', 'output_folder')
    filename = model + '_SM_' + timestamp + '.flv'
    pf = (path + filename)
@@ -66,7 +73,10 @@ if len(sid) > 2:
    os.system(command)
    print
    print(colored(" => END <= ", 'yellow','on_blue'))
+   sys.exit()
+
 else:
    print(colored(" => Model is OFFLINE <= ", 'yellow','on_red'))
    print
    print(colored(" => END <= ", 'yellow','on_blue'))
+   sys.exit()
